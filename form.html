@@ -1,122 +1,55 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Ajouter des Items</title>
-
-<style>
-    body { font-family: Arial; background:#f5f5f5; margin:0; }
-    header { background:#003366; color:white; padding:20px; text-align:center; }
-
-    nav {
-        background:#002244;
-        padding:10px;
-        text-align:center;
-    }
-    nav a {
-        color:white;
-        margin:0 20px;
-        text-decoration:none;
-        font-weight:bold;
-    }
-
-    .container {
-        background:white;
-        width:600px;
-        margin:40px auto;
-        padding:20px;
-        border-radius:10px;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    textarea {
-        width:100%;
-        height:200px;
-        padding:10px;
-        border-radius:5px;
-        border:1px solid #ccc;
-        font-family: monospace;
-    }
-
-    button {
-        width:100%;
-        padding:12px;
-        background:#003366;
-        color:white;
-        border:none;
-        border-radius:5px;
-        font-size:16px;
-        cursor:pointer;
-        margin-top:15px;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Form</title>
 </head>
-
 <body>
-
-<header>
-    <h1>Ajouter des Items depuis Google Sheet</h1>
-</header>
-
-<nav>
-    <a href="index.html">Dashboard</a>
-    <a href="form.html">Ajouter un item</a>
-</nav>
-
-<div class="container">
-    <h3>Collez ici les lignes de votre Google Sheet :</h3>
-    <p>(Copiez plusieurs lignes → Ctrl+C → collez ici → Valider)</p>
-
-     <textarea id="sheetInput" placeholder= " " ></textarea>
-
-    <button onclick="sendItems()">Ajouter les items</button>
-</div>
-
-<script>
-const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbyWiDKdeq7ax0omQO6ocqFJVnS0dmyAU8lHXtJJkTIRUT61ckkkUp1CfU2NDnz9zJdb/exec";
-
-async function sendItems() {
-    const raw = document.getElementById("sheetInput").value.trim();
-
-    if (!raw) {
-        alert("Veuillez coller des lignes depuis Google Sheet.");
-        return;
-    }
-
-    // Chaque ligne collée
-    const lines = raw.split("\n");
-
-    for (let line of lines) {
-        // Découpe par tabulation (Google Sheet utilise TAB)
-        const cols = line.split("\t");
-
-        // Construction de l'objet envoyé à Apps Script
-        const item = {
-            "N° Item": cols[0] || "",
-            "ITEM": cols[1] || "",
-            "Status": cols[2] || "",
-            "Action": cols[3] || "",
-            "Pilot": cols[4] || "",
-            "Due date": cols[5] || "",
-            "Done date": cols[6] || "",
-            "Comment": cols[7] || "",
-            "Links": cols[8] || ""
-        };
-
-        // Envoi POST vers Apps Script
-        await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(item)
+    <h1>Submit Your Items</h1>
+    <form id="itemForm">
+        <label for="itemName">Item Name:</label>
+        <input type="text" id="itemName" name="itemName" required>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+    <div id="feedback" style="color: red;"></div>
+    <script>
+        document.getElementById('itemForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            sendItems();
         });
-    }
 
-    alert("Items ajoutés avec succès !");
-    document.getElementById("sheetInput").value = "";
-}
-</script>
+        function sendItems() {
+            const itemName = document.getElementById('itemName').value;
+            const feedbackDiv = document.getElementById('feedback');
 
+            if (!itemName) {
+                feedbackDiv.innerText = 'Item name is required!';
+                return;
+            }
+
+            fetch('https://api.example.com/items', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                body: JSON.stringify({ name: itemName })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                feedbackDiv.innerText = 'Item submitted successfully! ID: ' + data.id;
+            })
+            .catch(error => {
+                feedbackDiv.innerText = 'There was a problem with your submission: ' + error;
+            });
+        }
+    </script>
 </body>
 </html>
