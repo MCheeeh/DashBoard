@@ -1,55 +1,201 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Form</title>
+<meta charset="UTF-8">
+<title>Ajouter des Items</title>
+
+<style>
+    body { font-family: Arial; background:#f5f5f5; margin:0; }
+    header { background:#003366; color:white; padding:20px; text-align:center; }
+
+    nav {
+        background:#002244;
+        padding:10px;
+        text-align:center;
+    }
+    nav a {
+        color:white;
+        margin:0 20px;
+        text-decoration:none;
+        font-weight:bold;
+    }
+
+    .container {
+        background:white;
+        width:600px;
+        margin:40px auto;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    textarea {
+        width:100%;
+        height:200px;
+        padding:10px;
+        border-radius:5px;
+        border:1px solid #ccc;
+        font-family: monospace;
+        box-sizing: border-box;
+    }
+
+    button {
+        width:100%;
+        padding:12px;
+        background:#003366;
+        color:white;
+        border:none;
+        border-radius:5px;
+        font-size:16px;
+        cursor:pointer;
+        margin-top:15px;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background:#002244;
+    }
+
+    button:disabled {
+        background:#cccccc;
+        cursor:not-allowed;
+    }
+
+    .status {
+        margin-top:15px;
+        padding:10px;
+        border-radius:5px;
+        display:none;
+        font-weight: bold;
+    }
+
+    .status.success {
+        background:#d4edda;
+        color:#155724;
+        border:1px solid #c3e6cb;
+        display:block;
+    }
+
+    .status.error {
+        background:#f8d7da;
+        color:#721c24;
+        border:1px solid #f5c6cb;
+        display:block;
+    }
+</style>
 </head>
+
 <body>
-    <h1>Submit Your Items</h1>
-    <form id="itemForm">
-        <label for="itemName">Item Name:</label>
-        <input type="text" id="itemName" name="itemName" required>
-        <br>
-        <input type="submit" value="Submit">
-    </form>
-    <div id="feedback" style="color: red;"></div>
-    <script>
-        document.getElementById('itemForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            sendItems();
-        });
 
-        function sendItems() {
-            const itemName = document.getElementById('itemName').value;
-            const feedbackDiv = document.getElementById('feedback');
+<header>
+    <h1>Ajouter des Items depuis Google Sheet</h1>
+</header>
 
-            if (!itemName) {
-                feedbackDiv.innerText = 'Item name is required!';
-                return;
-            }
+<nav>
+    <a href="index.html">Dashboard</a>
+    <a href="form.html">Ajouter un item</a>
+</nav>
 
-            fetch('https://api.example.com/items', {
-                method: 'POST',
+<div class="container">
+    <h3>Collez ici les lignes de votre Google Sheet :</h3>
+    <p>(Copiez plusieurs lignes → Ctrl+C → collez ici → Valider)</p>
+
+    <textarea id="sheetInput" placeholder="Collez vos données ici..."></textarea>
+
+    <button id="submitBtn" onclick="sendItems()">Ajouter les items</button>
+
+    <div id="statusMessage" class="status"></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbyWiDKdeq7ax0omQO6ocqFJVnS0dmyAU8lHXtJJkTIRUT61ckkkUp1CfU2NDnz9zJdb/exec";
+
+async function sendItems() {
+    const raw = document.getElementById("sheetInput").value.trim();
+    const btn = document.getElementById("submitBtn");
+    const statusDiv = document.getElementById("statusMessage");
+
+    // Validation
+    if (!raw) {
+        showStatus("❌ Veuillez coller des lignes depuis Google Sheet.", "error");
+        return;
+    }
+
+    // Désactiver le bouton
+    btn.disabled = true;
+    btn.textContent = "Envoi en cours...";
+    statusDiv.className = "status";
+
+    const lines = raw.split("\n").filter(line => line.trim());
+    let successCount = 0;
+    let errorCount = 0;
+    const errors = [];
+
+    console.log(`📤 Début de l'envoi de ${lines.length} ligne(s)...`);
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const cols = line.split("\t");
+
+        const item = {
+            "N° Item": cols[0] || "",
+            "ITEM": cols[1] || "",
+            "Status": cols[2] || "",
+            "Action": cols[3] || "",
+            "Pilot": cols[4] || "",
+            "Due date": cols[5] || "",
+            "Done date": cols[6] || "",
+            "Comment": cols[7] || "",
+            "Links": cols[8] || ""
+        };
+
+        try {
+            console.log(`📨 Envoi de l'item ${i + 1}:`, item);
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ name: itemName })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                feedbackDiv.innerText = 'Item submitted successfully! ID: ' + data.id;
-            })
-            .catch(error => {
-                feedbackDiv.innerText = 'There was a problem with your submission: ' + error;
+                body: JSON.stringify(item)
             });
+
+            successCount++;
+            console.log(`✅ Item ${i + 1} envoyé avec succès`);
+
+        } catch (error) {
+            errorCount++;
+            const errorMsg = `Ligne ${i + 1}: ${error.message}`;
+            errors.push(errorMsg);
+            console.error(`❌ Erreur ligne ${i + 1}:`, error);
         }
-    </script>
+    }
+
+    // Réactiver le bouton
+    btn.disabled = false;
+    btn.textContent = "Ajouter les items";
+
+    // Afficher le résultat
+    if (errorCount === 0) {
+        const message = `✅ ${successCount} item(s) ajouté(s) avec succès !`;
+        showStatus(message, "success");
+        console.log(message);
+        document.getElementById("sheetInput").value = "";
+    } else {
+        const message = `⚠️ ${successCount} item(s) envoyé(s), ${errorCount} erreur(s).\n${errors.join("\n")}`;
+        showStatus(message, "error");
+        console.error(message);
+    }
+}
+
+function showStatus(message, type) {
+    const statusDiv = document.getElementById("statusMessage");
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+}
+
+</script>
+
 </body>
 </html>
