@@ -49,7 +49,6 @@
         font-size:16px;
         cursor:pointer;
         margin-top:15px;
-        transition: background 0.3s;
     }
 
     button:hover {
@@ -58,7 +57,6 @@
 
     button:disabled {
         background:#cccccc;
-        cursor:not-allowed;
     }
 
     .status {
@@ -72,14 +70,12 @@
     .status.success {
         background:#d4edda;
         color:#155724;
-        border:1px solid #c3e6cb;
         display:block;
     }
 
     .status.error {
         background:#f8d7da;
         color:#721c24;
-        border:1px solid #f5c6cb;
         display:block;
     }
 </style>
@@ -88,7 +84,7 @@
 <body>
 
 <header>
-    <h1>Ajouter des Items depuis Google Sheet</h1>
+    <h1>Ajouter des Items</h1>
 </header>
 
 <nav>
@@ -108,35 +104,24 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbz6wSQYbnv0JtgKkn36bvLLwrgfKnjv2XZwLKQ_cDMOckszv7-lNksaO0MhAVNb8sY9/exec";
 
-async function sendItems() {
+function sendItems() {
     const raw = document.getElementById("sheetInput").value.trim();
     const btn = document.getElementById("submitBtn");
-    const statusDiv = document.getElementById("statusMessage");
 
-    // Validation
     if (!raw) {
-        showStatus("❌ Veuillez coller des lignes depuis Google Sheet.", "error");
+        showStatus("❌ Veuillez coller des lignes.", "error");
         return;
     }
 
-    // Désactiver le bouton
     btn.disabled = true;
-    btn.textContent = "Envoi en cours...";
-    statusDiv.className = "status";
+    btn.textContent = "Ajout en cours...";
 
     const lines = raw.split("\n").filter(line => line.trim());
-    let successCount = 0;
-    let errorCount = 0;
-    const errors = [];
-
-    console.log(`📤 Début de l'envoi de ${lines.length} ligne(s)...`);
+    const newItems = [];
 
     for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const cols = line.split("\t");
-
+        const cols = lines[i].split("\t");
         const item = {
             "N° Item": cols[0] || "",
             "ITEM": cols[1] || "",
@@ -148,46 +133,28 @@ async function sendItems() {
             "Comment": cols[7] || "",
             "Links": cols[8] || ""
         };
-
-        try {
-            console.log(`���� Envoi de l'item ${i + 1}:`, item);
-
-            const response = await fetch(API_URL, {
-                method: "POST",
-                mode: "cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(item)
-            });
-
-            const responseData = await response.json();
-            console.log(`✅ Item ${i + 1} envoyé. Réponse:`, responseData);
-            successCount++;
-
-        } catch (error) {
-            errorCount++;
-            const errorMsg = `Ligne ${i + 1}: ${error.message}`;
-            errors.push(errorMsg);
-            console.error(`❌ Erreur ligne ${i + 1}:`, error);
-        }
+        newItems.push(item);
     }
 
-    // Réactiver le bouton
+    // Récupérer les données existantes
+    const existingItems = JSON.parse(localStorage.getItem('dashboardItems')) || [];
+    
+    // Ajouter les nouveaux items
+    const allItems = [...existingItems, ...newItems];
+    
+    // Sauvegarder dans localStorage
+    localStorage.setItem('dashboardItems', JSON.stringify(allItems));
+
+    showStatus(`✅ ${newItems.length} item(s) ajouté(s) avec succès!`, "success");
+    
     btn.disabled = false;
     btn.textContent = "Ajouter les items";
+    document.getElementById("sheetInput").value = "";
 
-    // Afficher le résultat
-    if (errorCount === 0) {
-        const message = `✅ ${successCount} item(s) ajouté(s) avec succès !`;
-        showStatus(message, "success");
-        console.log(message);
-        document.getElementById("sheetInput").value = "";
-    } else {
-        const message = `⚠️ ${successCount} item(s) envoyé(s), ${errorCount} erreur(s).`;
-        showStatus(message, "error");
-        console.error(message);
-    }
+    // Rediriger vers le dashboard après 2 secondes
+    setTimeout(() => {
+        window.location.href = "index.html";
+    }, 2000);
 }
 
 function showStatus(message, type) {
