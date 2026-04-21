@@ -18,19 +18,18 @@
     th { background:#003366; color:white; }
 
     .no-data { text-align:center; padding:30px; color:#666; font-size:16px; }
-    .loading { text-align:center; padding:20px; color:#003366; font-weight:bold; }
-    .sync-btn { 
-        display: inline-block; 
-        background:#28a745; 
-        color:white; 
-        padding:8px 15px; 
-        border-radius:5px; 
-        cursor:pointer; 
-        margin:20px;
-        border:none;
-        font-weight:bold;
+    
+    .status-bar {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 12px;
+        z-index: 1000;
     }
-    .sync-btn:hover { background:#218838; }
 </style>
 </head>
 
@@ -45,10 +44,6 @@
     <a href="form.html">Ajouter un item</a>
 </nav>
 
-<div style="text-align:center;">
-    <button class="sync-btn" onclick="syncFromGoogleSheet()">🔄 Synchroniser du Google Sheet</button>
-</div>
-
 <h2 style="text-align:center;">Indicateurs</h2>
 
 <div class="kpi-container">
@@ -60,8 +55,6 @@
 </div>
 
 <h2 style="text-align:center;">Liste des tâches</h2>
-
-<div id="loading" class="loading" style="display:none;">⏳ Chargement...</div>
 
 <table id="task-table">
 <thead>
@@ -76,21 +69,20 @@
 </tr>
 </thead>
 <tbody id="table-body">
-    <tr><td colspan="7" class="no-data">Aucun item pour le moment</td></tr>
+    <tr><td colspan="7" class="no-data">Chargement des données...</td></tr>
 </tbody>
 </table>
+
+<div id="status-bar" class="status-bar">🔄 Synchronisation...</div>
 
 <script>
 
 const GOOGLE_SHEET_API = "https://script.google.com/a/macros/valeo.com/s/AKfycbyWiDKdeq7ax0omQO6ocqFJVnS0dmyAU8lHXtJJkTIRUT61ckkkUp1CfU2NDnz9zJdb/exec";
 
 async function syncFromGoogleSheet() {
-    const loadingDiv = document.getElementById("loading");
-    loadingDiv.style.display = "block";
-    loadingDiv.textContent = "⏳ Synchronisation en cours...";
-
     try {
-        console.log("📥 Tentative de synchronisation depuis Google Sheet...");
+        console.log("📥 Synchronisation depuis Google Sheet...");
+        updateStatus("🔄 Sync...");
         
         const response = await fetch(GOOGLE_SHEET_API, {
             method: "GET"
@@ -101,30 +93,26 @@ async function syncFromGoogleSheet() {
         }
 
         const data = await response.json();
-        console.log("✅ Données reçues du Google Sheet:", data);
+        console.log("✅ Données reçues:", data);
 
         // Sauvegarder dans localStorage
         localStorage.setItem('dashboardItems', JSON.stringify(data));
-        localStorage.setItem('lastSync', new Date().toISOString());
+        localStorage.setItem('lastSync', new Date().toLocaleTimeString('fr-FR'));
 
-        loadingDiv.textContent = "✅ Synchronisé!";
-        setTimeout(() => {
-            loadingDiv.style.display = "none";
-            loadData();
-        }, 1500);
+        loadData();
+        updateStatus("✅ " + localStorage.getItem('lastSync'));
 
     } catch (error) {
-        console.error("❌ Erreur de synchronisation:", error);
-        loadingDiv.textContent = "❌ Erreur: " + error.message + ". Utilisez les données locales.";
-        setTimeout(() => {
-            loadingDiv.style.display = "none";
-        }, 3000);
+        console.error("❌ Erreur:", error);
+        updateStatus("❌ Erreur sync");
+        // Charger les données locales si disponibles
+        loadData();
     }
 }
 
 function loadData() {
     const data = JSON.parse(localStorage.getItem('dashboardItems')) || [];
-    console.log("📊 Données chargées depuis localStorage:", data);
+    console.log("📊 Données chargées:", data);
     displayKPIs(data);
     displayTable(data);
 }
@@ -154,7 +142,7 @@ function displayTable(data) {
     const tbody = document.getElementById("table-body");
     
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Aucun item - Cliquez sur "Synchroniser" pour charger les données</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Aucun item pour le moment</td></tr>';
         return;
     }
 
@@ -177,11 +165,15 @@ function displayTable(data) {
     console.log(`✅ ${data.length} ligne(s) affichée(s)`);
 }
 
-// Au chargement: charger depuis localStorage
-loadData();
+function updateStatus(message) {
+    document.getElementById("status-bar").textContent = message;
+}
 
-// Rafraîchir toutes les 5 secondes
-setInterval(loadData, 5000);
+// Synchronisation au chargement
+syncFromGoogleSheet();
+
+// Synchroniser toutes les 60 secondes (1 minute)
+setInterval(syncFromGoogleSheet, 60000);
 
 </script>
 
