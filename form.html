@@ -108,6 +108,9 @@ async function sendItems() {
         // Envoi POST vers Apps Script
         await fetch(API_URL, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(item)
         });
     }
