@@ -62,43 +62,45 @@
 </nav>
 
 <form id="itemForm">
-  <label>N° Item</label>
+
+  <label>N° Item (optionnel)</label>
   <input type="number" name="N° Item">
 
-  <label>ITEM</label>
+  <label>ITEM (optionnel)</label>
   <input type="text" name="ITEM">
 
-  <label>Status</label>
+  <label>Status (optionnel)</label>
   <select name="Status">
+    <option value="">-- Aucun --</option>
     <option>To start</option>
     <option>Work In Progress</option>
     <option>Closed</option>
     <option>CANCEL</option>
   </select>
 
-  <label>Action</label>
+  <label>Action (optionnel)</label>
   <input type="text" name="Action">
 
-  <label>Pilot</label>
+  <label>Pilot (optionnel)</label>
   <input type="text" name="Pilot">
 
-  <label>Due date</label>
+  <label>Due date (optionnel)</label>
   <input type="date" name="Due date">
 
-  <label>Done date</label>
+  <label>Done date (optionnel)</label>
   <input type="date" name="Done date">
 
-  <label>Comment</label>
+  <label>Commentaire (optionnel)</label>
   <textarea name="Comment"></textarea>
 
-  <label>Links</label>
+  <label>Links (optionnel)</label>
   <input type="text" name="Links">
 
   <button type="submit">Ajouter</button>
 </form>
 
 <script>
-const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbwKWLcmXsCcqXRwUXPCxs47ZouFipWdwlXYBY3W8u8dcM9FultRSj9Lkyv6fQ9n9O5A/exec";
+const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbw3Cb9I4uZrKfXwZwJSn9vuJsqAESU2ewh5THLCOYxJ3S1_cqTTAdNUM1pZnVZ-MMmo/exec";
 
 document.getElementById("itemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
