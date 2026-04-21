@@ -67,15 +67,11 @@
     <h3>Collez ici les lignes de votre Google Sheet :</h3>
     <p>(Copiez plusieurs lignes → Ctrl+C → collez ici → Valider)</p>
 
-    <textarea id="sheetInput" placeholder="Exemple :
-1    Investigation solution    Closed    Définir listing...    F Fontanier    24/10/2024    22/10/2024    Commentaire    Lien
-2    Définition du banc        Closed    Finaliser choix...    F Fontanier    ..."></textarea>
-
     <button onclick="sendItems()">Ajouter les items</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbzZvcbqpCuNePgH19CjufdZZchyDPW3FPkMI2cfPkgWmHfFClDow5XAUj7Q-4eNnmUG/exec";
+const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbyWiDKdeq7ax0omQO6ocqFJVnS0dmyAU8lHXtJJkTIRUT61ckkkUp1CfU2NDnz9zJdb/exec";
 
 async function sendItems() {
     const raw = document.getElementById("sheetInput").value.trim();
