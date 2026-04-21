@@ -7,18 +7,8 @@
 <style>
     body { font-family: Arial; background:#f5f5f5; margin:0; }
     header { background:#003366; color:white; padding:20px; text-align:center; }
-
-    nav {
-        background:#002244;
-        padding:10px;
-        text-align:center;
-    }
-    nav a {
-        color:white;
-        margin:0 20px;
-        text-decoration:none;
-        font-weight:bold;
-    }
+    nav { background:#002244; padding:10px; text-align:center; }
+    nav a { color:white; margin:0 20px; text-decoration:none; font-weight:bold; }
 
     form {
         background:white;
@@ -28,24 +18,12 @@
         border-radius:10px;
         box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
-
     input, select, textarea {
-        width:100%;
-        padding:8px;
-        margin-bottom:15px;
-        border-radius:5px;
-        border:1px solid #ccc;
+        width:100%; padding:8px; margin-bottom:15px; border-radius:5px; border:1px solid #ccc;
     }
-
     button {
-        width:100%;
-        padding:10px;
-        background:#003366;
-        color:white;
-        border:none;
-        border-radius:5px;
-        font-size:16px;
-        cursor:pointer;
+        width:100%; padding:10px; background:#003366; color:white; border:none; border-radius:5px;
+        font-size:16px; cursor:pointer;
     }
 </style>
 </head>
@@ -63,13 +41,13 @@
 
 <form id="itemForm">
 
-  <label>N° Item (optionnel)</label>
+  <label>N° Item</label>
   <input type="number" name="N° Item">
 
-  <label>ITEM (optionnel)</label>
+  <label>ITEM</label>
   <input type="text" name="ITEM">
 
-  <label>Status (optionnel)</label>
+  <label>Status</label>
   <select name="Status">
     <option value="">-- Aucun --</option>
     <option>To start</option>
@@ -78,29 +56,29 @@
     <option>CANCEL</option>
   </select>
 
-  <label>Action (optionnel)</label>
+  <label>Action</label>
   <input type="text" name="Action">
 
-  <label>Pilot (optionnel)</label>
+  <label>Pilot</label>
   <input type="text" name="Pilot">
 
-  <label>Due date (optionnel)</label>
+  <label>Due date</label>
   <input type="date" name="Due date">
 
-  <label>Done date (optionnel)</label>
+  <label>Done date</label>
   <input type="date" name="Done date">
 
-  <label>Commentaire (optionnel)</label>
+  <label>Comment</label>
   <textarea name="Comment"></textarea>
 
-  <label>Links (optionnel)</label>
+  <label>Links</label>
   <input type="text" name="Links">
 
   <button type="submit">Ajouter</button>
 </form>
 
 <script>
-const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbw3Cb9I4uZrKfXwZwJSn9vuJsqAESU2ewh5THLCOYxJ3S1_cqTTAdNUM1pZnVZ-MMmo/exec";
+const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbzZvcbqpCuNePgH19CjufdZZchyDPW3FPkMI2cfPkgWmHfFClDow5XAUj7Q-4eNnmUG/exec";
 
 document.getElementById("itemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
