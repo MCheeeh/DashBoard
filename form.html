@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Ajouter un Item</title>
+</head>
+<body>
+
+<h1>Ajouter un Item</h1>
+
+<form id="itemForm">
+  <label>N° Item</label><br>
+  <input type="number" name="N° Item"><br><br>
+
+  <label>ITEM</label><br>
+  <input type="text" name="ITEM"><br><br>
+
+  <label>Status</label><br>
+  <select name="Status">
+    <option>To start</option>
+    <option>Work In Progress</option>
+    <option>Closed</option>
+    <option>CANCEL</option>
+  </select><br><br>
+
+  <label>Action</label><br>
+  <input type="text" name="Action"><br><br>
+
+  <label>Pilot</label><br>
+  <input type="text" name="Pilot"><br><br>
+
+  <label>Due date</label><br>
+  <input type="date" name="Due date"><br><br>
+
+  <label>Done date</label><br>
+  <input type="date" name="Done date"><br><br>
+
+  <label>Comment</label><br>
+  <textarea name="Comment"></textarea><br><br>
+
+  <label>Links</label><br>
+  <input type="text" name="Links"><br><br>
+
+  <button type="submit">Ajouter</button>
+</form>
+
+<script>
+const API_URL = "TON_URL_APPS_SCRIPT";
+
+document.getElementById("itemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const formData = Object.fromEntries(new FormData(e.target));
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(formData)
+  });
+
+  alert("Item ajouté !");
+  e.target.reset();
+});
+</script>
+
+</body>
+</html>
