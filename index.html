@@ -16,6 +16,9 @@
     table { width:95%; margin:30px auto; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; }
     th, td { padding:10px; border-bottom:1px solid #ddd; }
     th { background:#003366; color:white; }
+
+    .loading { text-align: center; font-size: 18px; color: #666; margin: 50px; }
+    .error { text-align: center; font-size: 18px; color: red; margin: 50px; }
 </style>
 </head>
 
@@ -42,7 +45,10 @@
 
 <h2 style="text-align:center;">Liste des tâches</h2>
 
-<table id="task-table">
+<div id="loading" class="loading">Chargement des données...</div>
+<div id="error" class="error" style="display:none;"></div>
+
+<table id="task-table" style="display:none;">
 <thead>
 <tr>
     <th>N°</th>
@@ -61,14 +67,37 @@
 const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbz6wSQYbnv0JtgKkn36bvLLwrgfKnjv2XZwLKQ_cDMOckszv7-lNksaO0MhAVNb8sY9/exec";
 
 async function loadData() {
-    const response = await fetch(API_URL);
-    const data = await response.json();
+    try {
+        console.log("📥 Tentative de chargement des données...");
+        
+        const response = await fetch(API_URL, {
+            method: "GET",
+            mode: "no-cors"
+        });
 
-    displayKPIs(data);
-    displayTable(data);
+        // Avec no-cors, on ne peut pas accéder à response.json()
+        // Donc on utilise une méthode alternative avec JSONP
+
+        // Essayez d'abord avec fetch normal
+        const response2 = await fetch(API_URL);
+        const data = await response2.json();
+        
+        console.log("✅ Données reçues:", data);
+        displayKPIs(data);
+        displayTable(data);
+
+    } catch (error) {
+        console.error("❌ Erreur de chargement:", error);
+        showError("Erreur lors du chargement des données. Vérifiez la console (F12).");
+    }
 }
 
 function displayKPIs(data) {
+    if (!Array.isArray(data)) {
+        console.warn("Les données ne sont pas un array:", data);
+        return;
+    }
+
     const total = data.length;
     const closed = data.filter(t => t.Status === "Closed").length;
     const wip = data.filter(t => t.Status === "Work In Progress").length;
@@ -88,6 +117,8 @@ function displayKPIs(data) {
 }
 
 function displayTable(data) {
+    if (!Array.isArray(data)) return;
+
     const tbody = document.querySelector("#task-table tbody");
     tbody.innerHTML = "";
 
@@ -104,6 +135,16 @@ function displayTable(data) {
         `;
         tbody.appendChild(tr);
     });
+
+    // Afficher le tableau et masquer le chargement
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("task-table").style.display = "table";
+}
+
+function showError(message) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("error").textContent = message;
+    document.getElementById("error").style.display = "block";
 }
 
 loadData();
