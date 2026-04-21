@@ -3,49 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <title>Ajouter un Item</title>
+
+<style>
+    body { font-family: Arial; background:#f5f5f5; margin:0; }
+    header { background:#003366; color:white; padding:20px; text-align:center; }
+
+    nav {
+        background:#002244;
+        padding:10px;
+        text-align:center;
+    }
+    nav a {
+        color:white;
+        margin:0 20px;
+        text-decoration:none;
+        font-weight:bold;
+    }
+
+    form {
+        background:white;
+        width:400px;
+        margin:40px auto;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    input, select, textarea {
+        width:100%;
+        padding:8px;
+        margin-bottom:15px;
+        border-radius:5px;
+        border:1px solid #ccc;
+    }
+
+    button {
+        width:100%;
+        padding:10px;
+        background:#003366;
+        color:white;
+        border:none;
+        border-radius:5px;
+        font-size:16px;
+        cursor:pointer;
+    }
+</style>
 </head>
+
 <body>
 
-<h1>Ajouter un Item</h1>
+<header>
+    <h1>Ajouter un Item</h1>
+</header>
+
+<nav>
+    <a href="index.html">Dashboard</a>
+    <a href="form.html">Ajouter un item</a>
+</nav>
 
 <form id="itemForm">
-  <label>N° Item</label><br>
-  <input type="number" name="N° Item"><br><br>
+  <label>N° Item</label>
+  <input type="number" name="N° Item">
 
-  <label>ITEM</label><br>
-  <input type="text" name="ITEM"><br><br>
+  <label>ITEM</label>
+  <input type="text" name="ITEM">
 
-  <label>Status</label><br>
+  <label>Status</label>
   <select name="Status">
     <option>To start</option>
     <option>Work In Progress</option>
     <option>Closed</option>
     <option>CANCEL</option>
-  </select><br><br>
+  </select>
 
-  <label>Action</label><br>
-  <input type="text" name="Action"><br><br>
+  <label>Action</label>
+  <input type="text" name="Action">
 
-  <label>Pilot</label><br>
-  <input type="text" name="Pilot"><br><br>
+  <label>Pilot</label>
+  <input type="text" name="Pilot">
 
-  <label>Due date</label><br>
-  <input type="date" name="Due date"><br><br>
+  <label>Due date</label>
+  <input type="date" name="Due date">
 
-  <label>Done date</label><br>
-  <input type="date" name="Done date"><br><br>
+  <label>Done date</label>
+  <input type="date" name="Done date">
 
-  <label>Comment</label><br>
-  <textarea name="Comment"></textarea><br><br>
+  <label>Comment</label>
+  <textarea name="Comment"></textarea>
 
-  <label>Links</label><br>
-  <input type="text" name="Links"><br><br>
+  <label>Links</label>
+  <input type="text" name="Links">
 
   <button type="submit">Ajouter</button>
 </form>
 
 <script>
-const API_URL = "TON_URL_APPS_SCRIPT";
+const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbwKWLcmXsCcqXRwUXPCxs47ZouFipWdwlXYBY3W8u8dcM9FultRSj9Lkyv6fQ9n9O5A/exec";
 
 document.getElementById("itemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
