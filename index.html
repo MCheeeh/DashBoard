@@ -16,6 +16,8 @@
     table { width:95%; margin:30px auto; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; }
     th, td { padding:10px; border-bottom:1px solid #ddd; }
     th { background:#003366; color:white; }
+
+    .no-data { text-align:center; padding:30px; color:#666; font-size:16px; }
 </style>
 </head>
 
@@ -54,13 +56,16 @@
     <th>Comment</th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody id="table-body">
+    <tr><td colspan="7" class="no-data">Aucun item pour le moment</td></tr>
+</tbody>
 </table>
 
 <script>
 
 function loadData() {
     const data = JSON.parse(localStorage.getItem('dashboardItems')) || [];
+    console.log("📊 Données chargées:", data);
     displayKPIs(data);
     displayTable(data);
 }
@@ -82,10 +87,18 @@ function displayKPIs(data) {
     document.getElementById("kpi-wip").textContent = wip;
     document.getElementById("kpi-start").textContent = start;
     document.getElementById("kpi-late").textContent = late;
+
+    console.log(`📈 KPIs: Total=${total}, Closed=${closed}, WIP=${wip}, Start=${start}, Late=${late}`);
 }
 
 function displayTable(data) {
-    const tbody = document.querySelector("#task-table tbody");
+    const tbody = document.getElementById("table-body");
+    
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Aucun item pour le moment</td></tr>';
+        return;
+    }
+
     tbody.innerHTML = "";
 
     data.forEach(row => {
@@ -101,9 +114,16 @@ function displayTable(data) {
         `;
         tbody.appendChild(tr);
     });
+
+    console.log(`✅ ${data.length} ligne(s) affichée(s)`);
 }
 
+// Charger les données au chargement de la page
 loadData();
+
+// Rafraîchir les données toutes les 2 secondes si elles changent
+setInterval(loadData, 2000);
+
 </script>
 
 </body>
