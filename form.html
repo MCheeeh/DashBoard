@@ -2,28 +2,52 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Ajouter un Item</title>
+<title>Ajouter des Items</title>
 
 <style>
     body { font-family: Arial; background:#f5f5f5; margin:0; }
     header { background:#003366; color:white; padding:20px; text-align:center; }
-    nav { background:#002244; padding:10px; text-align:center; }
-    nav a { color:white; margin:0 20px; text-decoration:none; font-weight:bold; }
 
-    form {
+    nav {
+        background:#002244;
+        padding:10px;
+        text-align:center;
+    }
+    nav a {
+        color:white;
+        margin:0 20px;
+        text-decoration:none;
+        font-weight:bold;
+    }
+
+    .container {
         background:white;
-        width:400px;
+        width:600px;
         margin:40px auto;
         padding:20px;
         border-radius:10px;
         box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
-    input, select, textarea {
-        width:100%; padding:8px; margin-bottom:15px; border-radius:5px; border:1px solid #ccc;
+
+    textarea {
+        width:100%;
+        height:200px;
+        padding:10px;
+        border-radius:5px;
+        border:1px solid #ccc;
+        font-family: monospace;
     }
+
     button {
-        width:100%; padding:10px; background:#003366; color:white; border:none; border-radius:5px;
-        font-size:16px; cursor:pointer;
+        width:100%;
+        padding:12px;
+        background:#003366;
+        color:white;
+        border:none;
+        border-radius:5px;
+        font-size:16px;
+        cursor:pointer;
+        margin-top:15px;
     }
 </style>
 </head>
@@ -31,7 +55,7 @@
 <body>
 
 <header>
-    <h1>Ajouter un Item</h1>
+    <h1>Ajouter des Items depuis Google Sheet</h1>
 </header>
 
 <nav>
@@ -39,60 +63,58 @@
     <a href="form.html">Ajouter un item</a>
 </nav>
 
-<form id="itemForm">
+<div class="container">
+    <h3>Collez ici les lignes de votre Google Sheet :</h3>
+    <p>(Copiez plusieurs lignes → Ctrl+C → collez ici → Valider)</p>
 
-  <label>N° Item</label>
-  <input type="number" name="N° Item">
+    <textarea id="sheetInput" placeholder="Exemple :
+1    Investigation solution    Closed    Définir listing...    F Fontanier    24/10/2024    22/10/2024    Commentaire    Lien
+2    Définition du banc        Closed    Finaliser choix...    F Fontanier    ..."></textarea>
 
-  <label>ITEM</label>
-  <input type="text" name="ITEM">
-
-  <label>Status</label>
-  <select name="Status">
-    <option value="">-- Aucun --</option>
-    <option>To start</option>
-    <option>Work In Progress</option>
-    <option>Closed</option>
-    <option>CANCEL</option>
-  </select>
-
-  <label>Action</label>
-  <input type="text" name="Action">
-
-  <label>Pilot</label>
-  <input type="text" name="Pilot">
-
-  <label>Due date</label>
-  <input type="date" name="Due date">
-
-  <label>Done date</label>
-  <input type="date" name="Done date">
-
-  <label>Comment</label>
-  <textarea name="Comment"></textarea>
-
-  <label>Links</label>
-  <input type="text" name="Links">
-
-  <button type="submit">Ajouter</button>
-</form>
+    <button onclick="sendItems()">Ajouter les items</button>
+</div>
 
 <script>
 const API_URL = "https://script.google.com/a/macros/valeo.com/s/AKfycbzZvcbqpCuNePgH19CjufdZZchyDPW3FPkMI2cfPkgWmHfFClDow5XAUj7Q-4eNnmUG/exec";
 
-document.getElementById("itemForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+async function sendItems() {
+    const raw = document.getElementById("sheetInput").value.trim();
 
-  const formData = Object.fromEntries(new FormData(e.target));
+    if (!raw) {
+        alert("Veuillez coller des lignes depuis Google Sheet.");
+        return;
+    }
 
-  await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(formData)
-  });
+    // Chaque ligne collée
+    const lines = raw.split("\n");
 
-  alert("Item ajouté !");
-  e.target.reset();
-});
+    for (let line of lines) {
+        // Découpe par tabulation (Google Sheet utilise TAB)
+        const cols = line.split("\t");
+
+        // Construction de l'objet envoyé à Apps Script
+        const item = {
+            "N° Item": cols[0] || "",
+            "ITEM": cols[1] || "",
+            "Status": cols[2] || "",
+            "Action": cols[3] || "",
+            "Pilot": cols[4] || "",
+            "Due date": cols[5] || "",
+            "Done date": cols[6] || "",
+            "Comment": cols[7] || "",
+            "Links": cols[8] || ""
+        };
+
+        // Envoi POST vers Apps Script
+        await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(item)
+        });
+    }
+
+    alert("Items ajoutés avec succès !");
+    document.getElementById("sheetInput").value = "";
+}
 </script>
 
 </body>
